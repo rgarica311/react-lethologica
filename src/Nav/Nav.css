@@ -1,0 +1,29 @@
+header {
+  height: 56px;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  background-color: #c74130;
+  z-index: 2;
+}
+
+nav {
+  top: 0;
+  width: 100%;
+  position: absolute;
+}
+
+ul {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 15px;
+  list-style-type: none;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+  font-family: 'Montserrat', sans-serif;
+  margin-right: 15px;
+}
