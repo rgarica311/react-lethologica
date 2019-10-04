@@ -31,8 +31,9 @@ export default class SearchBar extends Component {
 
             <div className='suggestions' >
               <ul className='suggestions_list' style={{display: context.displayProp}}>
+
                 {context.queryName !== null && context.queryName.length > 2
-                  ? context.popNames.length > 0 ? context.renderPopNames() : context.renderApiNames()
+                  ? context.popSuggestions.length > 0 ? context.renderPopNames() : context.renderApiNames()
                   : console.log('awaiting 3 characters')}
               </ul>
               <div className="empty"></div>

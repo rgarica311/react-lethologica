@@ -45,6 +45,32 @@ button {
   width: 75px;
 }
 
+.suggestion_image {
+  height: 50px;
+  width: 50px;
+  margin-right: 10px;
+}
+
+.suggestion_element {
+  display: flex;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 550px;
+}
+
+.suggestion_element:hover {
+  background-color: #c74130;;
+}
+
+.suggest_text {
+  font-family: 'Oswald', sans-serif;
+}
+
+.text_info {
+  display: flex;
+  flex-direction: column;
+}
+
 .suggestions {
   display: flex;
   width: 80vw;

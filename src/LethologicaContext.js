@@ -2,6 +2,7 @@ import React from 'react';
 
 const LethologicaContext = React.createContext({
   actors: [],
+  popSuggestions: null,
   queryName: null,
   apiNames: [],
   popNames: null,
