@@ -16,7 +16,7 @@ export default class SearchBar extends Component {
           <span id="searchInstructions">Search two actors/directors/producers</span>
           <div className="input-container">
             <div className="search_box_button">
-              <input className="search_input" placeholder="Denzel Washington, Sanaa Lathan"
+              <input value={context.inputVal} className="search_input" placeholder="Denzel Washington, Sanaa Lathan"
               required onChange={(event) => {
                 console.log('this.value', event.target.value)
                 context.updateActors(event.target.value);

@@ -14,12 +14,15 @@ class App extends Component {
     this.onChangeSuggest = this.onChangeSuggest.bind(this);
     this.renderPopNames = this.renderPopNames.bind(this);
     this.renderApiNames = this.renderApiNames.bind(this);
+    this.getIds = this.getIds.bind(this);
     //this.updateCreditState = this.updateCreditState.bind(this);
     //this.updateMovieIdState = this.updateMovieIdState.bind(this);
 
   }
 
   state = {
+    inputVal: '',
+    firstName: '',
     queryName: null,
     filmResults: {},
     titles: null,
@@ -63,6 +66,9 @@ class App extends Component {
   };
 
   async getIds(actors) {
+    this.setState({
+      displayProp: 'none',
+    })
     const responses = [];
     const apiKey = 'api_key=3e9d342e0f8308faebfe8db3fffc50e7';
     for (let i = 0; i < actors.length; i++) {
@@ -121,7 +127,21 @@ class App extends Component {
             {
               this.state.apiData.length !== 0
               ? this.state.apiData.map(object =>
-                <li className='suggestion_element' key={object.apiName}>
+                <li onClick={() => {
+                    this.state.inputVal === this.state.queryName
+                      ? this.setState({
+                          inputVal: object.apiName,
+                          firstName: object.apiName + ', '
+                        })
+                      : this.setState({
+                          inputVal: this.state.firstName +  object.apiName
+                      }, () => {
+                        this.setState({
+                          actors: this.state.inputVal
+                        })
+                      })
+
+                  }} className='suggestion_element' key={object.apiName}>
                   <img className='suggestion_image' alt='profile' src={object.apiProfilePath}></img>
                   <div className='text_info'>
                     <span className='suggest_text'>{object.apiName}</span>
@@ -148,7 +168,21 @@ class App extends Component {
         {
           this.state.popSuggestions.length !== 0
             ? this.state.popSuggestions.map(object =>
-              <li className='suggestion_element' key={object.popName}>
+              <li onClick={() => {
+                  this.state.inputVal === this.state.queryName
+                    ? this.setState({
+                        inputVal: object.popName,
+                        firstName: object.popName + ', '
+                      })
+                    : this.setState({
+                        inputVal: this.state.firstName +  object.popName
+                    }, () => {
+                      this.setState({
+                        actors: this.state.inputVal
+                      })
+                    })
+
+                }} className='suggestion_element' key={object.popName}>
                 <img className='suggestion_image' alt="profile" src={object.popProfilePath}></img>
                 <div className='text_info'>
                   <span className='suggest_text'>{object.popName}</span>
@@ -171,8 +205,15 @@ class App extends Component {
   async onChangeSuggest(query) {
     const suggestedNames = [];
     let name = query.charAt(0).toUpperCase() + query.slice(1);
+    let nameQuery = query.charAt(0).toUpperCase() + query.slice(1);
+    if(name.includes(', ' , /[a-zA-Z]/)){
+      let sliceIndex = name.indexOf(',') + 2
+      name = name.slice(sliceIndex)
+    }
+
     this.setState({
-      queryName: name
+      queryName: name,
+      inputVal: nameQuery,
     })
     if(name.length > 2) {
       const responses = [];
@@ -406,7 +447,9 @@ class App extends Component {
   }
 
   render() {
+
     const contextValue = {
+      inputVal: this.state.inputVal,
       queryName: this.state.queryName,
       names: this.state.names,
       apiNames: this.state.filmData.apiNames,
