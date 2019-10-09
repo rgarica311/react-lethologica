@@ -1,0 +1,11 @@
+.no-results-modal {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border-radius: 10px;
+  width: 600px;
+  height: 150px;
+  margin: 0 auto;
+}

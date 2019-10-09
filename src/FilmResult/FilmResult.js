@@ -2,7 +2,6 @@ import React from 'react';
 import './filmResult.css';
 
 function FilmResult(props) {
-  console.log('props.posterPath', props.posterPath)
   return (
       <div className='flex_filmInfo'>
         <img src={props.posterPath} height='278px' alt="film poster"/>

@@ -1,0 +1,53 @@
+.suggestion_image {
+  height: 50px;
+  width: 50px;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.suggestion_element {
+  display: flex;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  width: 600px;
+  border-bottom: 1px solid black;
+}
+
+.suggestion_element:hover {
+  background-color: #c74130;
+  cursor: pointer;
+}
+
+.suggest_text {
+  font-family: 'Oswald', sans-serif;
+}
+
+.text_info {
+  display: flex;
+  flex-direction: column;
+}
+
+.empty {
+  height: 35px;
+  width: 75px;
+}
+
+.suggestions {
+  display: flex;
+  width: 80vw;
+  margin: 0 auto;
+  position: relative;
+  justify-content: center;
+  top: 135px;
+}
+
+.suggestion_list {
+  display: block;
+  flex-direction: column;
+  background-color: whitesmoke;
+  margin-right: 10px;
+  width: 600px;
+  padding: 0;
+  height: 400px;
+  overflow-y: scroll
+}

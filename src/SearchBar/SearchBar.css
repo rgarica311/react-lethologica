@@ -7,6 +7,14 @@
   display: block;
 }
 
+#secondNameAlert {
+  position: relative;
+  top: 150px;
+  width: max-content;
+  margin: 0 auto;
+  display: block;
+}
+
 input {
   border: 1px solid black;
   border-radius: 5px;
@@ -40,54 +48,8 @@ button {
   vertical-align: middle;
 }
 
-.empty {
-  height: 35px;
-  width: 75px;
-}
 
-.suggestion_image {
-  height: 50px;
-  width: 50px;
-  margin-right: 10px;
-}
 
-.suggestion_element {
-  display: flex;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  width: 550px;
-}
-
-.suggestion_element:hover {
-  background-color: #c74130;;
-}
-
-.suggest_text {
-  font-family: 'Oswald', sans-serif;
-}
-
-.text_info {
-  display: flex;
-  flex-direction: column;
-}
-
-.suggestions {
-  display: flex;
-  width: 80vw;
-  margin: 0 auto;
-  position: relative;
-  justify-content: center;
-  top: 135px;
-}
-
-.suggestions_list {
-  display: flex;
-  flex-direction: column;
-  width: 600px;
-  margin-right: 10px;
-  background-color: white;
-  align-items: flex-start;
-}
 
 @media screen and (max-width: 412px) {
   input {

@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import LethologicaContext from './LethologicaContext';
 import FilmResult from './FilmResult/FilmResult';
-import Nav from './Nav/Nav';
 import SearchBar from './SearchBar/SearchBar';
+import Suggestions from './Suggestions/Suggestions';
 import './App.css';
 import axios from 'axios';
 import './FilmData';
+import NoResults from './NoResults/NoResults';
+
 
 class App extends Component {
   constructor(props) {
@@ -15,17 +17,19 @@ class App extends Component {
     this.renderPopNames = this.renderPopNames.bind(this);
     this.renderApiNames = this.renderApiNames.bind(this);
     this.getIds = this.getIds.bind(this);
+    //this.handleClose = this.handleClose.bind(this);
     //this.updateCreditState = this.updateCreditState.bind(this);
     //this.updateMovieIdState = this.updateMovieIdState.bind(this);
 
   }
 
   state = {
+    show: 'true',
+    searchInput: 'searchInput',
     inputVal: '',
     firstName: '',
     queryName: null,
     filmResults: {},
-    titles: null,
     unique0: null,
     unique1: null,
     names: null,
@@ -52,8 +56,15 @@ class App extends Component {
       sharedCreditsIds: [],
     },
     displayProp: 'none',
+    spanDisplay: 'none',
+    modalDisplayVal: 'flex',
   };
 
+  showModal = e => {
+    this.setState({
+      show: !this.state.show
+    });
+  };
 
   updateActors = actors => {
     console.log('this in update actors', this)
@@ -68,22 +79,28 @@ class App extends Component {
   async getIds(actors) {
     this.setState({
       displayProp: 'none',
+      show: !this.state.show,
+      inputVal: '',
     })
     const responses = [];
     const apiKey = 'api_key=3e9d342e0f8308faebfe8db3fffc50e7';
     for (let i = 0; i < actors.length; i++) {
       let response = await axios.get(`https://api.themoviedb.org/3/search/person?${apiKey}&language=en-US&page=1&include_adult=false&query=${actors[i]}`);
-      responses.push(response.data.results[0].id);
+      if(response.data.results[0] !== undefined) {
+        responses.push(response.data.results[0].id);
+      }
+
     };
     console.log('this', this);
     this.getCredits(responses);
   }
 
+
+
   async componentDidMount() {
     const names = [];
     const nameIds = [];
     const profilePath = [];
-    const popNameIds = [];
     const knownFor = [];
     const popDataObjects = [];
     let baseUrl = 'http://image.tmdb.org/t/p/w185/';
@@ -97,6 +114,7 @@ class App extends Component {
             popName: response.data.results[j].name,
             popProfilePath: baseUrl + response.data.results[j].profile_path,
             popKnownFor: response.data.results[j].known_for[0],
+            popID: response.data.results[j].id
           }
           popDataObjects.push(popData[object])
           names.push(response.data.results[j].name)
@@ -120,42 +138,56 @@ class App extends Component {
 
 
   renderApiNames(){
-    console.log('rendering api names')
+    console.log('rendering api names apidata:', this.state.apiData)
+
       return (
 
         <>
-            {
-              this.state.apiData.length !== 0
-              ? this.state.apiData.map(object =>
-                <li onClick={() => {
-                    this.state.inputVal === this.state.queryName
-                      ? this.setState({
-                          inputVal: object.apiName,
-                          firstName: object.apiName + ', '
-                        })
-                      : this.setState({
-                          inputVal: this.state.firstName +  object.apiName
-                      }, () => {
-                        this.setState({
-                          actors: this.state.inputVal
-                        })
-                      })
+            { this.state.renderRan > 1
+              ? null
+              : this.state.apiData.length !== 0
+                ? <ul className='suggestion_list' style={{display: this.state.displayProp}}>
+                    {this.state.apiData.map(object =>
+                    <li onClick={() => {
+                        console.log('this in render apinames', this)
+                        this.state.inputVal === this.state.queryName
+                          ? this.setState({
+                              inputVal: object.apiName + ', ',
+                              firstName: object.apiName + ', ',
+                              displayProp: 'none',
+                              spanDisplay: 'block',
 
-                  }} className='suggestion_element' key={object.apiName}>
-                  <img className='suggestion_image' alt='profile' src={object.apiProfilePath}></img>
-                  <div className='text_info'>
-                    <span className='suggest_text'>{object.apiName}</span>
-                    {object.apiKnownFor !== undefined
-                      ? <span className='suggest_text'>Known for: {object.apiKnownFor.title}</span>
-                      : <></>
-                    }
-                  </div>
-                </li>
-              )
-              : console.log('empty')
+                            }, () => {
+                              //this.refs.searchInput.focus()
+                            })
+                          : this.setState({
+                              inputVal: this.state.firstName +  object.apiName,
+                              displayProp: 'none',
+                              spanDisplay: 'none',
+                          }, () => {
+                            //this.refs.searchInput.focus()
+                            this.setState({
+                              actors: this.state.inputVal
+                            })
+                          })
+
+                      }} className='suggestion_element' key={object.apiID}>
+                      {!object.apiProfilePath.includes(null)
+                        ? <img className='suggestion_image' alt='profile' src={object.apiProfilePath}></img>
+                        : <img className='suggestion_image' alt='profile' src={require('./Images/profile.svg')}></img>}
+                      <div className='text_info'>
+                        <span className='suggest_text'>{object.apiName}</span>
+                        {object.apiKnownFor !== undefined
+                          ? <span className='suggest_text'>Known for: {object.apiKnownFor.title}</span>
+                          : null
+                        }
+                      </div>
+                    </li>
+                )}
+                </ul>
+                : null
+
             }
-
-
         </>
 
       )
@@ -167,53 +199,74 @@ class App extends Component {
       <>
         {
           this.state.popSuggestions.length !== 0
-            ? this.state.popSuggestions.map(object =>
+            ? <ul className='suggestion_list' style={{display: this.state.displayProp}}>
+              {this.state.popSuggestions.map(object =>
               <li onClick={() => {
+                  //this.searchInput.focus()
+                  console.log('this in render pop', this)
                   this.state.inputVal === this.state.queryName
                     ? this.setState({
-                        inputVal: object.popName,
-                        firstName: object.popName + ', '
+                        inputVal: object.popName + ', ',
+                        firstName: object.popName + ', ',
+                        displayProp: 'none',
+                        spanDisplay: 'block',
+                      }, () => {
+                        //this.refs.searchInput.focus()
                       })
                     : this.setState({
-                        inputVal: this.state.firstName +  object.popName
+                        inputVal: this.state.firstName + object.popName,
+                        displayProp: 'none',
+                        spanDisplay: 'none',
                     }, () => {
+                      //this.refs.searchInput.focus()
                       this.setState({
                         actors: this.state.inputVal
                       })
                     })
+                }
+              } className='suggestion_element' key={object.popName}>
 
-                }} className='suggestion_element' key={object.popName}>
-                <img className='suggestion_image' alt="profile" src={object.popProfilePath}></img>
+                  {!object.popProfilePath.includes(null)
+                    ? <img className='suggestion_image' alt='profile' src={object.popProfilePath}></img>
+                    : <img className='suggestion_image' alt='profile' src={require('./Images/profile.svg')}></img> }
+
                 <div className='text_info'>
                   <span className='suggest_text'>{object.popName}</span>
                   {
-                    object.popKnownFor != undefined
+                    object.popKnownFor !== undefined
                     ? <span className='suggest_text'>Known for: {object.popKnownFor.title}</span>
-                    : <></>
+                    : null
                   }
 
                 </div>
               </li>
-            )
-            : console.log('empty')
-        }
+            )}
+              </ul>
+            : null
+          }
       </>
     )
 
   }
 
+  capitalizeName(str) {
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()})
+  }
+
   async onChangeSuggest(query) {
+    console.log('query capitalize', this.capitalizeName(query))
     const suggestedNames = [];
     let name = query.charAt(0).toUpperCase() + query.slice(1);
-    let nameQuery = query.charAt(0).toUpperCase() + query.slice(1);
     if(name.includes(', ' , /[a-zA-Z]/)){
       let sliceIndex = name.indexOf(',') + 2
       name = name.slice(sliceIndex)
+      //name = name.charAt(0).toUpperCase() + name.slice(1);
     }
+
 
     this.setState({
       queryName: name,
-      inputVal: nameQuery,
+      inputVal: this.capitalizeName(query),
     })
     if(name.length > 2) {
       const responses = [];
@@ -229,10 +282,10 @@ class App extends Component {
       for(let i=0; i<this.state.popData.length; i++) {
         for(let key in this.state.popData[i]) {
           //console.log('this.state.popData.length', this.state.popData.length)
-          if(key !== 'popKnownFor' && key !== 'popProfilePath') {
+          if(key !== 'popKnownFor' && key !== 'popProfilePath' && key !== 'popID') {
             console.log(`this.state.popData[${i}][${key}]`, this.state.popData[i][key])
 
-            if(this.state.popData[i][key].indexOf(name)!=-1) {
+            if(this.state.popData[i][key].indexOf(name) !== -1) {
               popResults.push(this.state.popData[i]);
             }
           }
@@ -243,7 +296,7 @@ class App extends Component {
       filmData.popNames = suggestedNames
       this.setState({
         popNames: suggestedNames,
-        displayProp: 'flex',
+        displayProp: 'block',
         filmData,
         popSuggestions: popResults
       })
@@ -256,9 +309,11 @@ class App extends Component {
           console.log('person response data', response)
           for (let i = 0; i<response.data.results.length; i++) {
             let object = 'object' + i
+
             apiData[object] = {apiName: response.data.results[i].name,
               apiProfilePath: baseUrl + response.data.results[i].profile_path,
-              apiKnownFor: response.data.results[i].known_for[0]
+              apiKnownFor: response.data.results[i].known_for[0],
+              apiID: response.data.results[i].id
              }
             apiDataObjects.push(apiData[object])
             responses.push(response.data.results[i].name)
@@ -389,14 +444,14 @@ class App extends Component {
     }));
   };
 
-  updateSharedCreditsIds(ids) {
+  /*updateSharedCreditsIds(ids) {
     this.setState(prevState => ({
       filmData: {
         ...prevState.filmData,
         sharedCreditsIds: ids,
       },
     }));
-  };
+  };*/
 
   async getFilmInfo(ids) {
     console.log('debug getfilminfo running');
@@ -429,19 +484,24 @@ class App extends Component {
   renderResults() {
 
     let filmResults = this.state.filmResults;
-    console.log('filmResults length in renderResults', filmResults);
+    console.log('render results running')
+    console.log('filmResults length in renderResults', filmResults.length);
 
     return (
       <>
-      {Object.keys(filmResults).map(film => (
-        <FilmResult
-          key={filmResults[film].id}
-          posterPath={filmResults[film].posterPath}
-          title={filmResults[film].title}
-          tagline={filmResults[film].tagline}
-          overview={filmResults[film].overview}
-          releaseDate={filmResults[film].releaseDate}/>
-      ))}
+      {
+        filmResults.length === 0
+          ? <NoResults onClose={this.showModal}/>
+          :Object.keys(filmResults).map(film => (
+          <FilmResult
+            key={filmResults[film].id}
+            posterPath={filmResults[film].posterPath}
+            title={filmResults[film].title}
+            tagline={filmResults[film].tagline}
+            overview={filmResults[film].overview}
+            releaseDate={filmResults[film].releaseDate}/>
+        ))
+    }
       </>
     );
   }
@@ -449,6 +509,7 @@ class App extends Component {
   render() {
 
     const contextValue = {
+      searchInput: this.state.searchInput,
       inputVal: this.state.inputVal,
       queryName: this.state.queryName,
       names: this.state.names,
@@ -465,16 +526,25 @@ class App extends Component {
       renderPopNames: this.renderPopNames,
       displayProp: this.state.displayProp,
       renderApiNames: this.renderApiNames,
+      spanDisplay: this.state.spanDisplay,
+      modalDisplayVal: this.state.modalDisplayVal,
+      handleClose: this.handleClose,
+      show: this.state.show,
     };
     return (
       <LethologicaContext.Provider value={contextValue}>
+
         <main className='App'>
-          <Nav/>
           <div className='app-title'>
-            <span className='letho'>LETHOLOGICA</span>
-            <span className='desc'>When it's on the tip of your tongue...</span>
+            <span className='letho'>LETHOLOGICA CINEMATICA</span>
+            <span className='desc'>When you can't remember the name of that movie with Sinbad and Phil Hartman...</span>
           </div>
           <SearchBar/>
+          {this.state.queryName !== null && this.state.queryName.length > 2
+            ? this.state.popSuggestions.length > 0 ? <Suggestions className='overflow-scrolling'>{this.renderPopNames()}</Suggestions> : <Suggestions className='overflow-scrolling'>{this.renderApiNames()}</Suggestions>
+            : null
+          }
+
           <div className='flex_results'>
             {this.renderResults()}
           </div>

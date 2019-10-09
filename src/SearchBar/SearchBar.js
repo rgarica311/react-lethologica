@@ -1,22 +1,30 @@
 import React, { Component } from 'react';
 import './SearchBar.css';
 import LethologicaContext from '../LethologicaContext';
+import ReactDOM from 'react-dom';
 
-export default class SearchBar extends Component {
+
+export default class SearchBar extends Component{
+  constructor(props){
+    super(props)
+    this.searchInput = React.createRef();
+    this.list = React.createRef();
+
+  }
+  componentDidUpdate(){
+    this.searchInput.current.focus()
+    console.log('this.refs.SearchBar.refs.list', ReactDOM.findDOMNode(this.list.current))
+  }
   render() {
     return (
       <LethologicaContext.Consumer>
       {(context) => (
-        console.log('context.queryName.length', context.queryName),
-        context.queryName != null
-          ? console.log('context query name length', context.queryName.length)
-          : console.log('context.queryName', context.queryName),
 
         <>
           <span id="searchInstructions">Search two actors/directors/producers</span>
           <div className="input-container">
             <div className="search_box_button">
-              <input value={context.inputVal} className="search_input" placeholder="Denzel Washington, Sanaa Lathan"
+              <input ref={this.searchInput} autoFocus={true} value={context.inputVal} className="search_input" placeholder="e.g. Denzel Washington, Sanaa Lathan"
               required onChange={(event) => {
                 console.log('this.value', event.target.value)
                 context.updateActors(event.target.value);
@@ -27,17 +35,9 @@ export default class SearchBar extends Component {
               onClick={() => {
                 context.getIds(context.actors.split(','));
               }}>SEARCH</button>
-            </div>
 
-            <div className='suggestions' >
-              <ul className='suggestions_list' style={{display: context.displayProp}}>
-
-                {context.queryName !== null && context.queryName.length > 2
-                  ? context.popSuggestions.length > 0 ? context.renderPopNames() : context.renderApiNames()
-                  : console.log('awaiting 3 characters')}
-              </ul>
-              <div className="empty"></div>
             </div>
+            <span style={{display: context.spanDisplay}} id='secondNameAlert'>Enter a second name to search!</span>
 
           </div>
 
