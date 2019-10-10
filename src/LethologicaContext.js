@@ -11,6 +11,8 @@ const LethologicaContext = React.createContext({
   show: null,
   specialCharCheck: null,
   handleClose: () => {},
+  popSuggestions: [],
+  apiData: [],
 });
 
 export default LethologicaContext;

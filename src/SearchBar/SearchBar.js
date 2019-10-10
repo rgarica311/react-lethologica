@@ -44,7 +44,7 @@ export default class SearchBar extends Component{
           <span id="searchInstructions">Search two actors/directors/producers</span>
           <div className="input-container">
             <div className="search_box_button">
-              <input type='text' autoFocus={true} value={this.state.value} className="search_input" placeholder="e.g. Sinbad, Phil Hartman"
+              <input type='text' autoFocus={true} value={context.inputVal} className="search_input" placeholder="e.g. Sinbad, Phil Hartman"
               required onChange={(event) => {
                 this.handleChange(event, context.updateActors)
                 //context.updateActors(this.state.value);
