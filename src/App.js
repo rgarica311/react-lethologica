@@ -5,7 +5,6 @@ import SearchBar from './SearchBar/SearchBar';
 import Suggestions from './Suggestions/Suggestions';
 import './App.css';
 import axios from 'axios';
-import './FilmData';
 import NoResults from './NoResults/NoResults';
 
 
@@ -17,13 +16,10 @@ class App extends Component {
     this.renderPopNames = this.renderPopNames.bind(this);
     this.renderApiNames = this.renderApiNames.bind(this);
     this.getIds = this.getIds.bind(this);
-    //this.handleClose = this.handleClose.bind(this);
-    //this.updateCreditState = this.updateCreditState.bind(this);
-    //this.updateMovieIdState = this.updateMovieIdState.bind(this);
-
   }
 
   state = {
+    headerDisplay: 'none',
     actors: undefined,
     specialCharCheck: null,
     show: 'true',
@@ -74,7 +70,7 @@ class App extends Component {
 
     this.setState({
       actors: actors,
-      filmsWithActors: actors,
+
       specialCharCheck: regex.test(actors)
     }, () => {
       console.log('this.state.actors in update actors', this.state.actors);
@@ -86,7 +82,18 @@ class App extends Component {
     this.setState({
       displayProp: 'none',
       show: !this.state.show,
+      filmResults: null,
+      filmsWithActors: this.state.actors
     })
+    let regex = /[~\`!"#$%\^&*+=\-\[\]\\;/{}|\:<>\?]/g;
+
+    if(this.state.inputVal !== null){
+      if(regex.test(this.state.inputVal) === false){
+        this.setState({
+          inputVal: ""
+        })
+      }
+    }
 
     if(this.state.actors !== undefined){
       if(this.state.actors !== ""){
@@ -145,17 +152,8 @@ class App extends Component {
           knownFor.push(response.data.results[j].known_for[0])
         }
     }
-    let filmData = {...this.state.filmData}
 
-    filmData.popNames = names
-    filmData.popNameIds = nameIds
-    filmData.popProfilePath = profilePath
-    filmData.popKnownFor = knownFor
-    this.setState({
-      popData: popDataObjects,
-      names: names,
-      filmData
-    }, () => console.log('names loaded into state'))
+
   };
 
 
@@ -189,7 +187,8 @@ class App extends Component {
                           }, () => {
                             //this.refs.searchInput.focus()
                             this.setState({
-                              actors: this.state.inputVal
+                              actors: this.state.inputVal,
+                              filmsWithActors: this.state.inputVal
                             })
                           })
 
@@ -242,7 +241,8 @@ class App extends Component {
                     }, () => {
                       //this.refs.searchInput.focus()
                       this.setState({
-                        actors: this.state.inputVal
+                        actors: this.state.inputVal,
+                        filmsWithActors: this.state.inputVal
                       })
                     })
                 }
@@ -278,8 +278,8 @@ class App extends Component {
   async onChangeSuggest(query) {
     let regex = /[~\`!"#$%\^&*+=\-\[\]\\;/{}|\:<>\?]/g;
     this.setState({
-
       inputVal: this.capitalizeName(query),
+      spanDisplay: 'none'
     })
     if(regex.test(this.state.inputVal) === false){
       console.log('query capitalize', this.capitalizeName(query))
@@ -376,11 +376,6 @@ class App extends Component {
   async getCredits (ids)  {
     const url = 'https://api.themoviedb.org/3/person/';
 
-    let masterList;
-
-
-    console.log('type of titlesids @ initiant', typeof titleIds)
-
     try {
       console.log('try block of getcredits');
       console.log('ids.length', ids.length);
@@ -413,15 +408,13 @@ class App extends Component {
         this.setState({
           [unique]: [...new Set(titleIds)]
         }, () => {
-          console.log('this.state', this.state.unique0)
-          masterList = this.state.unique0.concat(this.state.unique1)
+          this.setState({
+            masterList: this.state.unique0.concat(this.state.unique1)
+          })
         })
       };
 
-      console.log('masterList outside loop', masterList)
-      console.log('dupes', this.find_duplicate_in_array(masterList))
-
-      this.getFilmInfo(this.find_duplicate_in_array(masterList));
+      this.getFilmInfo(this.find_duplicate_in_array(this.state.masterList));
 
     }
     catch (error) {
@@ -503,6 +496,7 @@ class App extends Component {
       if(responses.length > 0){
         this.setState({
           filmResults: responses,
+          headerDisplay: 'block'
         });
       } else {
         this.setState({
@@ -565,13 +559,11 @@ class App extends Component {
       modalDisplayVal: this.state.modalDisplayVal,
       handleClose: this.handleClose,
       show: this.state.show,
-      actors: this.state.actors,
       specialCharCheck: this.state.specialCharCheck
 
     };
     return (
       <LethologicaContext.Provider value={contextValue}>
-
         <main className='App'>
           <div className='app-title'>
             <span className='letho'>LETHOLOGICA CINEMATICA</span>
@@ -582,7 +574,7 @@ class App extends Component {
             ? this.state.popSuggestions.length > 0 ? <Suggestions className='overflow-scrolling'>{this.renderPopNames()}</Suggestions> : <Suggestions className='overflow-scrolling'>{this.renderApiNames()}</Suggestions>
             : null
           }
-
+          <span className='titleDisplay' style={{display: this.state.headerDisplay}}>Films with: {this.state.filmsWithActors}</span>
           <div className='flex_results'>
             {this.renderResults()}
           </div>

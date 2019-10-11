@@ -15,7 +15,6 @@ export default class NoResults extends Component {
       <LethologicaContext.Consumer>
       {
         (context) => (
-        console.log('render no results running context.filmResults', context.filmResults),
 
         context.show === true && context.actors === undefined
           ?<div className='no-results-modal'>
@@ -35,7 +34,7 @@ export default class NoResults extends Component {
               </div>
               : context.show === true && context.actors === ""
                   ? <div className='no-results-modal'>
-                    <span>Sorry, it looks like the search field may have been empty.</span>
+                    <span>Search field is empty.</span>
                     <span>Try a different search!</span>
                     <button onClick={e => {
                       this.onClose(e);
@@ -43,7 +42,7 @@ export default class NoResults extends Component {
                   </div>
                   : context.show === true && context.filmResults === null
                       ? <div className='no-results-modal'>
-                        <span>Sorry, those names don't seem to share any credits.</span>
+                        <span>Sorry, no shared credits found.</span>
                         <span>Try a different search!</span>
                         <button onClick={e => {
                           this.onClose(e);
