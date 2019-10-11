@@ -24,12 +24,14 @@ class App extends Component {
   }
 
   state = {
+    actors: undefined,
+    specialCharCheck: null,
     show: 'true',
     searchInput: 'searchInput',
     inputVal: '',
     firstName: '',
     queryName: null,
-    filmResults: {},
+    filmResults: null,
     unique0: null,
     unique1: null,
     names: null,
@@ -68,34 +70,54 @@ class App extends Component {
 
   updateActors = actors => {
     console.log('this in update actors', this)
+    let regex = /[~\`!"#$%\^&*+=\-\[\]\\;/{}|\:<>\?]/g;
+
     this.setState({
       actors: actors,
+      filmsWithActors: actors,
+      specialCharCheck: regex.test(actors)
     }, () => {
       console.log('this.state.actors in update actors', this.state.actors);
     });
 
   };
 
-  async getIds(actors) {
+  async getIds() {
     this.setState({
       displayProp: 'none',
       show: !this.state.show,
-      inputVal: '',
     })
-    const responses = [];
-    const apiKey = 'api_key=3e9d342e0f8308faebfe8db3fffc50e7';
-    for (let i = 0; i < actors.length; i++) {
-      let response = await axios.get(`https://api.themoviedb.org/3/search/person?${apiKey}&language=en-US&page=1&include_adult=false&query=${actors[i]}`);
-      if(response.data.results[0] !== undefined) {
-        responses.push(response.data.results[0].id);
+
+    if(this.state.actors !== undefined){
+      if(this.state.actors !== ""){
+        if(this.state.specialCharCheck === false){
+          let actors = this.state.actors.split(',')
+          const responses = [];
+          const apiKey = 'api_key=3e9d342e0f8308faebfe8db3fffc50e7';
+          for (let i = 0; i < actors.length; i++) {
+            let response = await axios.get(`https://api.themoviedb.org/3/search/person?${apiKey}&language=en-US&page=1&include_adult=false&query=${actors[i]}`);
+            if(response.data.results[0] !== undefined) {
+              responses.push(response.data.results[0].id);
+            }
+
+          };
+          console.log('this', this);
+          this.getCredits(responses);
+        } else {
+          this.setState({
+            show: true
+          })
+        }
+
       }
 
-    };
-    console.log('this', this);
-    this.getCredits(responses);
+    } else {
+      this.setState({
+        show: true
+      })
+    }
+
   }
-
-
 
   async componentDidMount() {
     const names = [];
@@ -254,94 +276,101 @@ class App extends Component {
   }
 
   async onChangeSuggest(query) {
-    console.log('query capitalize', this.capitalizeName(query))
-    const suggestedNames = [];
-    let name = query.charAt(0).toUpperCase() + query.slice(1);
-    if(name.includes(', ' , /[a-zA-Z]/)){
-      let sliceIndex = name.indexOf(',') + 2
-      name = name.slice(sliceIndex)
-      //name = name.charAt(0).toUpperCase() + name.slice(1);
-    }
-
-
+    let regex = /[~\`!"#$%\^&*+=\-\[\]\\;/{}|\:<>\?]/g;
     this.setState({
-      queryName: name,
+
       inputVal: this.capitalizeName(query),
     })
-    if(name.length > 2) {
-      const responses = [];
-      const nameIds = [];
-      const profilePath = [];
-      const knownFor = [];
-      const apiDataObjects = [];
-      const popResults = [];
-      const apiKey = 'api_key=3e9d342e0f8308faebfe8db3fffc50e7';
-      let apiData = {...this.state.apiData};
-      let baseUrl = 'http://image.tmdb.org/t/p/w185/';
-      //console.log('this.state.popData[0]', this.state.popData[0])
-      for(let i=0; i<this.state.popData.length; i++) {
-        for(let key in this.state.popData[i]) {
-          //console.log('this.state.popData.length', this.state.popData.length)
-          if(key !== 'popKnownFor' && key !== 'popProfilePath' && key !== 'popID') {
-            console.log(`this.state.popData[${i}][${key}]`, this.state.popData[i][key])
+    if(regex.test(this.state.inputVal) === false){
+      console.log('query capitalize', this.capitalizeName(query))
+      const suggestedNames = [];
+      let name = query.charAt(0).toUpperCase() + query.slice(1);
+      if(name.includes(', ' , /[a-zA-Z]/)){
+        let sliceIndex = name.indexOf(',') + 2
+        name = name.slice(sliceIndex)
+        //name = name.charAt(0).toUpperCase() + name.slice(1);
+      }
 
-            if(this.state.popData[i][key].indexOf(name) !== -1) {
-              popResults.push(this.state.popData[i]);
+      this.setState({
+        queryName: name
+      })
+
+      if(name.length > 2) {
+        const responses = [];
+        const nameIds = [];
+        const profilePath = [];
+        const knownFor = [];
+        const apiDataObjects = [];
+        const popResults = [];
+        const apiKey = 'api_key=3e9d342e0f8308faebfe8db3fffc50e7';
+        let apiData = {...this.state.apiData};
+        let baseUrl = 'http://image.tmdb.org/t/p/w185/';
+        //console.log('this.state.popData[0]', this.state.popData[0])
+        for(let i=0; i<this.state.popData.length; i++) {
+          for(let key in this.state.popData[i]) {
+            //console.log('this.state.popData.length', this.state.popData.length)
+            if(key !== 'popKnownFor' && key !== 'popProfilePath' && key !== 'popID') {
+              console.log(`this.state.popData[${i}][${key}]`, this.state.popData[i][key])
+
+              if(this.state.popData[i][key].indexOf(name) !== -1) {
+                popResults.push(this.state.popData[i]);
+              }
             }
           }
         }
-      }
 
-      let filmData = {...this.state.filmData}
-      filmData.popNames = suggestedNames
-      this.setState({
-        popNames: suggestedNames,
-        displayProp: 'block',
-        filmData,
-        popSuggestions: popResults
-      })
+        let filmData = {...this.state.filmData}
+        filmData.popNames = suggestedNames
+        this.setState({
+          popNames: suggestedNames,
+          displayProp: 'block',
+          filmData,
+          popSuggestions: popResults
+        })
 
-      if(suggestedNames.length > 0){
-        console.log('suggested names from state', suggestedNames)
+        if(suggestedNames.length > 0){
+          console.log('suggested names from state', suggestedNames)
+
+        } else {
+            let response = await axios.get(`https://api.themoviedb.org/3/search/person?${apiKey}&language=en-US&page=1&include_adult=false&query=${name}`);
+            console.log('person response data', response)
+            for (let i = 0; i<response.data.results.length; i++) {
+              let object = 'object' + i
+
+              apiData[object] = {apiName: response.data.results[i].name,
+                apiProfilePath: baseUrl + response.data.results[i].profile_path,
+                apiKnownFor: response.data.results[i].known_for[0],
+                apiID: response.data.results[i].id
+               }
+              apiDataObjects.push(apiData[object])
+              responses.push(response.data.results[i].name)
+              nameIds.push(response.data.results[i].id)
+
+
+            }
+
+            let filmData = {...this.state.filmData};
+
+
+            filmData.apiData.apiNames = responses;
+            filmData.apiNameIds = nameIds;
+            filmData.apiData.apiProfilePath = profilePath
+            filmData.apiData.apiKnownFor = knownFor
+            this.setState({
+              apiData: apiDataObjects,
+              apiNames: responses,
+              filmData,
+            })
+            console.log('names sugggestions from api', responses)
+        }
 
       } else {
-          let response = await axios.get(`https://api.themoviedb.org/3/search/person?${apiKey}&language=en-US&page=1&include_adult=false&query=${name}`);
-          console.log('person response data', response)
-          for (let i = 0; i<response.data.results.length; i++) {
-            let object = 'object' + i
-
-            apiData[object] = {apiName: response.data.results[i].name,
-              apiProfilePath: baseUrl + response.data.results[i].profile_path,
-              apiKnownFor: response.data.results[i].known_for[0],
-              apiID: response.data.results[i].id
-             }
-            apiDataObjects.push(apiData[object])
-            responses.push(response.data.results[i].name)
-            nameIds.push(response.data.results[i].id)
-
-
-          }
-
-          let filmData = {...this.state.filmData};
-
-
-          filmData.apiData.apiNames = responses;
-          filmData.apiNameIds = nameIds;
-          filmData.apiData.apiProfilePath = profilePath
-          filmData.apiData.apiKnownFor = knownFor
           this.setState({
-            apiData: apiDataObjects,
-            apiNames: responses,
-            filmData,
+            displayProp: 'none',
           })
-          console.log('names sugggestions from api', responses)
       }
-
-    } else {
-        this.setState({
-          displayProp: 'none',
-        })
     }
+
   }
 
   async getCredits (ids)  {
@@ -471,9 +500,16 @@ class App extends Component {
                 id: response.data.id});
       }
       console.log('responses', responses);
-      this.setState({
-        filmResults: responses,
-      });
+      if(responses.length > 0){
+        this.setState({
+          filmResults: responses,
+        });
+      } else {
+        this.setState({
+          show: true
+        })
+      }
+
 
     } catch (error) {
       console.error(error);
@@ -482,15 +518,14 @@ class App extends Component {
   }
 
   renderResults() {
-
     let filmResults = this.state.filmResults;
-    console.log('render results running')
-    console.log('filmResults length in renderResults', filmResults.length);
+    console.log('render results running', filmResults)
+    //console.log('filmResults', filmResults.length);
 
     return (
       <>
       {
-        filmResults.length === 0
+        filmResults === null
           ? <NoResults onClose={this.showModal}/>
           :Object.keys(filmResults).map(film => (
           <FilmResult
@@ -530,6 +565,9 @@ class App extends Component {
       modalDisplayVal: this.state.modalDisplayVal,
       handleClose: this.handleClose,
       show: this.state.show,
+      actors: this.state.actors,
+      specialCharCheck: this.state.specialCharCheck
+
     };
     return (
       <LethologicaContext.Provider value={contextValue}>

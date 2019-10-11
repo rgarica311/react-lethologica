@@ -19,10 +19,12 @@ const LethologicaContext = React.createContext({
   names: [],
   displayProp: null,
   spanDisplay: null,
-  inputVal: null,
+  inputVal: '',
   searchInput: 'searchInput',
   handleClose: () => {},
   show: null,
+  actors: undefined,
+  specialCharCheck: null
 });
 
 export default LethologicaContext;

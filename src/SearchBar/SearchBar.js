@@ -24,16 +24,17 @@ export default class SearchBar extends Component{
           <span id="searchInstructions">Search two actors/directors/producers</span>
           <div className="input-container">
             <div className="search_box_button">
-              <input ref={this.searchInput} autoFocus={true} value={context.inputVal} className="search_input" placeholder="e.g. Denzel Washington, Sanaa Lathan"
+              <input type='text' ref={this.searchInput} autoFocus={true} value={context.inputVal} className="search_input" placeholder="e.g. Denzel Washington, Sanaa Lathan"
               required onChange={(event) => {
                 console.log('this.value', event.target.value)
                 context.updateActors(event.target.value);
+                
                 context.onChangeSuggest(event.target.value);
               }}/>
 
               <button className="search_button"
               onClick={() => {
-                context.getIds(context.actors.split(','));
+                context.getIds();
               }}>SEARCH</button>
 
             </div>
