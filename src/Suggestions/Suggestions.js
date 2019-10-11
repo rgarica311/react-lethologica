@@ -11,9 +11,6 @@ export default class Suggestions extends Component {
       {(context) => (
             <div className='suggestions' >
               {this.props.children}
-                {/*context.queryName !== null && context.queryName.length > 2
-                  ? context.popSuggestions.length > 0 ? context.renderPopNames() : context.renderApiNames()
-                  : console.log('awaiting 3 characters')*/}
                 <div className='empty'></div>
             </div>
       )}

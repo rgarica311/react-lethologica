@@ -13,7 +13,6 @@ export default class SearchBar extends Component{
   }
   componentDidUpdate(){
     this.searchInput.current.focus()
-    console.log('this.refs.SearchBar.refs.list', ReactDOM.findDOMNode(this.list.current))
   }
   render() {
     return (
@@ -26,9 +25,7 @@ export default class SearchBar extends Component{
             <div className="search_box_button">
               <input type='text' ref={this.searchInput} autoFocus={true} value={context.inputVal} className="search_input" placeholder="e.g. Denzel Washington, Sanaa Lathan"
               required onChange={(event) => {
-                console.log('this.value', event.target.value)
                 context.updateActors(event.target.value);
-                
                 context.onChangeSuggest(event.target.value);
               }}/>
 

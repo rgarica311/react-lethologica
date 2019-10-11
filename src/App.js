@@ -6,7 +6,7 @@ import Suggestions from './Suggestions/Suggestions';
 import './App.css';
 import axios from 'axios';
 import NoResults from './NoResults/NoResults';
-
+import config from './config';
 
 class App extends Component {
   constructor(props) {
@@ -14,7 +14,7 @@ class App extends Component {
     this.getCredits = this.getCredits.bind(this);
     this.onChangeSuggest = this.onChangeSuggest.bind(this);
     this.renderPopNames = this.renderPopNames.bind(this);
-    this.renderApiNames = this.renderApiNames.bind(this);
+    this.renderNames = this.renderNames.bind(this);
     this.getIds = this.getIds.bind(this);
   }
 
@@ -31,25 +31,25 @@ class App extends Component {
     unique0: null,
     unique1: null,
     names: null,
-    apiNames: null,
+    Names: null,
     popNames: null,
-    apiData: [],
+    Data: [],
     popData: [],
     popSuggestions: [],
     filmData: {
-      apiData: {
-        apiNames: [],
-        apiKnownFor: [],
-        apiProfilePath: [],
+      Data: {
+        Names: [],
+        KnownFor: [],
+        ProfilePath: [],
       },
       titleIds: [],
       popNames: [],
-      apiNames: [],
-      apiNameIds: [],
+      Names: [],
+      NameIds: [],
       popNameIds: [],
-      apiProfilePath: [],
+      ProfilePath: [],
       popProfilePath: [],
-      apiKnownFor: [],
+      KnownFor: [],
       popKnownFor: [],
       sharedCreditsIds: [],
     },
@@ -65,15 +65,11 @@ class App extends Component {
   };
 
   updateActors = actors => {
-    console.log('this in update actors', this)
     let regex = /[~\`!"#$%\^&*+=\-\[\]\\;/{}|\:<>\?]/g;
 
     this.setState({
       actors: actors,
-
       specialCharCheck: regex.test(actors)
-    }, () => {
-      console.log('this.state.actors in update actors', this.state.actors);
     });
 
   };
@@ -85,6 +81,16 @@ class App extends Component {
       filmResults: null,
       filmsWithActors: this.state.actors
     })
+    if(this.state.name === null){
+      this.setState({
+        headerDisplay: 'none'
+      })
+    }
+    if(this.state.specialCharCheck === true){
+      this.setState({
+        headerDisplay: 'none'
+      })
+    }
     let regex = /[~\`!"#$%\^&*+=\-\[\]\\;/{}|\:<>\?]/g;
 
     if(this.state.inputVal !== null){
@@ -100,15 +106,13 @@ class App extends Component {
         if(this.state.specialCharCheck === false){
           let actors = this.state.actors.split(',')
           const responses = [];
-          const apiKey = 'api_key=3e9d342e0f8308faebfe8db3fffc50e7';
           for (let i = 0; i < actors.length; i++) {
-            let response = await axios.get(`https://api.themoviedb.org/3/search/person?${apiKey}&language=en-US&page=1&include_adult=false&query=${actors[i]}`);
+            let response = await axios.get(`https://.themoviedb.org/3/search/person?api_key=${config.API_KEY}&language=en-US&page=1&include_adult=false&query=${actors[i]}`);
             if(response.data.results[0] !== undefined) {
               responses.push(response.data.results[0].id);
             }
 
           };
-          console.log('this', this);
           this.getCredits(responses);
         } else {
           this.setState({
@@ -135,8 +139,7 @@ class App extends Component {
     let baseUrl = 'http://image.tmdb.org/t/p/w185/';
     let popData = {...this.state.popData}
     for(let i = 1; i<50; i++) {
-        let response = await axios.get(`https://api.themoviedb.org/3/person/popular?api_key=3e9d342e0f8308faebfe8db3fffc50e7&language=en-US&page=${i}`)
-        console.log('popular people response', response)
+        let response = await axios.get(`https://.themoviedb.org/3/person/popular?api_key=${config.API_KEY}&language=en-US&page=${i}`)
         for(let j = 0; j<response.data.results.length; j++){
           let object = 'object' + i;
           popData[object] = {
@@ -157,49 +160,42 @@ class App extends Component {
   };
 
 
-  renderApiNames(){
-    console.log('rendering api names apidata:', this.state.apiData)
-
+  renderNames(){
       return (
 
         <>
             { this.state.renderRan > 1
               ? null
-              : this.state.apiData.length !== 0
+              : this.state.Data.length !== 0
                 ? <ul className='suggestion_list' style={{display: this.state.displayProp}}>
-                    {this.state.apiData.map(object =>
+                    {this.state.Data.map(object =>
                     <li onClick={() => {
-                        console.log('this in render apinames', this)
                         this.state.inputVal === this.state.queryName
                           ? this.setState({
-                              inputVal: object.apiName + ', ',
-                              firstName: object.apiName + ', ',
+                              inputVal: object.Name + ', ',
+                              firstName: object.Name + ', ',
                               displayProp: 'none',
                               spanDisplay: 'block',
-
-                            }, () => {
-                              //this.refs.searchInput.focus()
                             })
                           : this.setState({
-                              inputVal: this.state.firstName +  object.apiName,
+                              inputVal: this.state.firstName +  object.Name,
                               displayProp: 'none',
                               spanDisplay: 'none',
                           }, () => {
-                            //this.refs.searchInput.focus()
                             this.setState({
                               actors: this.state.inputVal,
                               filmsWithActors: this.state.inputVal
                             })
                           })
 
-                      }} className='suggestion_element' key={object.apiID}>
-                      {!object.apiProfilePath.includes(null)
-                        ? <img className='suggestion_image' alt='profile' src={object.apiProfilePath}></img>
+                      }} className='suggestion_element' key={object.ID}>
+                      {!object.ProfilePath.includes(null)
+                        ? <img className='suggestion_image' alt='profile' src={object.ProfilePath}></img>
                         : <img className='suggestion_image' alt='profile' src={require('./Images/profile.svg')}></img>}
                       <div className='text_info'>
-                        <span className='suggest_text'>{object.apiName}</span>
-                        {object.apiKnownFor !== undefined
-                          ? <span className='suggest_text'>Known for: {object.apiKnownFor.title}</span>
+                        <span className='suggest_text'>{object.Name}</span>
+                        {object.KnownFor !== undefined
+                          ? <span className='suggest_text'>Known for: {object.KnownFor.title}</span>
                           : null
                         }
                       </div>
@@ -215,7 +211,6 @@ class App extends Component {
   }
 
   renderPopNames() {
-    console.log('rendering popular names')
     return (
       <>
         {
@@ -223,16 +218,12 @@ class App extends Component {
             ? <ul className='suggestion_list' style={{display: this.state.displayProp}}>
               {this.state.popSuggestions.map(object =>
               <li onClick={() => {
-                  //this.searchInput.focus()
-                  console.log('this in render pop', this)
                   this.state.inputVal === this.state.queryName
                     ? this.setState({
                         inputVal: object.popName + ', ',
                         firstName: object.popName + ', ',
                         displayProp: 'none',
                         spanDisplay: 'block',
-                      }, () => {
-                        //this.refs.searchInput.focus()
                       })
                     : this.setState({
                         inputVal: this.state.firstName + object.popName,
@@ -271,24 +262,22 @@ class App extends Component {
 
   }
 
-  capitalizeName(str) {
+  ctalizeName(str) {
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()})
   }
 
   async onChangeSuggest(query) {
     let regex = /[~\`!"#$%\^&*+=\-\[\]\\;/{}|\:<>\?]/g;
     this.setState({
-      inputVal: this.capitalizeName(query),
+      inputVal: this.ctalizeName(query),
       spanDisplay: 'none'
     })
     if(regex.test(this.state.inputVal) === false){
-      console.log('query capitalize', this.capitalizeName(query))
       const suggestedNames = [];
       let name = query.charAt(0).toUpperCase() + query.slice(1);
       if(name.includes(', ' , /[a-zA-Z]/)){
         let sliceIndex = name.indexOf(',') + 2
         name = name.slice(sliceIndex)
-        //name = name.charAt(0).toUpperCase() + name.slice(1);
       }
 
       this.setState({
@@ -300,18 +289,13 @@ class App extends Component {
         const nameIds = [];
         const profilePath = [];
         const knownFor = [];
-        const apiDataObjects = [];
+        const DataObjects = [];
         const popResults = [];
-        const apiKey = 'api_key=3e9d342e0f8308faebfe8db3fffc50e7';
-        let apiData = {...this.state.apiData};
+        let Data = {...this.state.Data};
         let baseUrl = 'http://image.tmdb.org/t/p/w185/';
-        //console.log('this.state.popData[0]', this.state.popData[0])
         for(let i=0; i<this.state.popData.length; i++) {
           for(let key in this.state.popData[i]) {
-            //console.log('this.state.popData.length', this.state.popData.length)
             if(key !== 'popKnownFor' && key !== 'popProfilePath' && key !== 'popID') {
-              console.log(`this.state.popData[${i}][${key}]`, this.state.popData[i][key])
-
               if(this.state.popData[i][key].indexOf(name) !== -1) {
                 popResults.push(this.state.popData[i]);
               }
@@ -328,40 +312,35 @@ class App extends Component {
           popSuggestions: popResults
         })
 
-        if(suggestedNames.length > 0){
-          console.log('suggested names from state', suggestedNames)
+        if(suggestedNames.length >= 1){
+          let response = await axios.get(`https://.themoviedb.org/3/search/person?api_key=${config.API_KEY}&language=en-US&page=1&include_adult=false&query=${name}`);
+          for (let i = 0; i<response.data.results.length; i++) {
+            let object = 'object' + i
+
+            Data[object] = {
+              Name: response.data.results[i].name,
+              ProfilePath: baseUrl + response.data.results[i].profile_path,
+              KnownFor: response.data.results[i].known_for[0],
+              ID: response.data.results[i].id
+             }
+            DataObjects.push(Data[object])
+            responses.push(response.data.results[i].name)
+            nameIds.push(response.data.results[i].id)
+          }
+
+          let filmData = {...this.state.filmData};
+          filmData.Data.Names = responses;
+          filmData.NameIds = nameIds;
+          filmData.Data.ProfilePath = profilePath
+          filmData.Data.KnownFor = knownFor
+          this.setState({
+            Data: DataObjects,
+            Names: responses,
+            filmData,
+          })
 
         } else {
-            let response = await axios.get(`https://api.themoviedb.org/3/search/person?${apiKey}&language=en-US&page=1&include_adult=false&query=${name}`);
-            console.log('person response data', response)
-            for (let i = 0; i<response.data.results.length; i++) {
-              let object = 'object' + i
 
-              apiData[object] = {apiName: response.data.results[i].name,
-                apiProfilePath: baseUrl + response.data.results[i].profile_path,
-                apiKnownFor: response.data.results[i].known_for[0],
-                apiID: response.data.results[i].id
-               }
-              apiDataObjects.push(apiData[object])
-              responses.push(response.data.results[i].name)
-              nameIds.push(response.data.results[i].id)
-
-
-            }
-
-            let filmData = {...this.state.filmData};
-
-
-            filmData.apiData.apiNames = responses;
-            filmData.apiNameIds = nameIds;
-            filmData.apiData.apiProfilePath = profilePath
-            filmData.apiData.apiKnownFor = knownFor
-            this.setState({
-              apiData: apiDataObjects,
-              apiNames: responses,
-              filmData,
-            })
-            console.log('names sugggestions from api', responses)
         }
 
       } else {
@@ -374,16 +353,14 @@ class App extends Component {
   }
 
   async getCredits (ids)  {
-    const url = 'https://api.themoviedb.org/3/person/';
+    const url = 'https://.themoviedb.org/3/person/';
 
     try {
-      console.log('try block of getcredits');
-      console.log('ids.length', ids.length);
       for (let i = 0; i < ids.length; i++) {
         let titles = [];
         let titleIds = [];
         let response = await axios.get(url.concat(ids[i],
-          '/movie_credits?api_key=3e9d342e0f8308faebfe8db3fffc50e7&language=en-US'))
+          `/movie_credits?api_key=${config.API_KEY}&language=en-US`))
         let castItem = response.data.cast;
         let crewItem = response.data.crew;
 
@@ -399,7 +376,6 @@ class App extends Component {
           for (let x = 0; x < crewItem.length; x++) {
             titles.push(crewItem[x].title);
             titleIds.push(crewItem[x].id);
-            //console.log('debug titles in crewitem loop', titles.length)
           }
         }
 
@@ -443,48 +419,13 @@ class App extends Component {
 
   }
 
-
-
-  updateCreditState (credit, titles) {
-
-    this.setState(prevState => ({
-      filmData: {
-        ...prevState.filmData,
-        [credit]: titles,
-      },
-    }));
-
-  };
-
-  updateMovieIdState (movieid, titleIds) {
-    this.setState(prevState => ({
-      filmData: {
-        ...prevState.filmData,
-        [movieid]: titleIds,
-      },
-
-    }));
-  };
-
-  /*updateSharedCreditsIds(ids) {
-    this.setState(prevState => ({
-      filmData: {
-        ...prevState.filmData,
-        sharedCreditsIds: ids,
-      },
-    }));
-  };*/
-
   async getFilmInfo(ids) {
-    console.log('debug getfilminfo running');
-    const url = 'https://api.themoviedb.org/3/movie/';
+    const url = 'https://.themoviedb.org/3/movie/';
     let responses = [];
     try {
-      console.log('debug ids getinfo', ids);
       for (let i = 0; i < ids.length; i++) {
         const response = await axios.get(url.concat(ids[i],
-          '?api_key=3e9d342e0f8308faebfe8db3fffc50e7&language=en-US'));
-        console.log('entire resposne', response);
+          `?api_key=${config.API_KEY}&language=en-US`));
         responses.push({overview: response.data.overview,
                   posterPath: 'http://image.tmdb.org/t/p/w185/' + response.data.poster_path,
                   releaseDate: response.data.release_date,
@@ -492,7 +433,6 @@ class App extends Component {
                   title: response.data.title,
                 id: response.data.id});
       }
-      console.log('responses', responses);
       if(responses.length > 0){
         this.setState({
           filmResults: responses,
@@ -513,8 +453,6 @@ class App extends Component {
 
   renderResults() {
     let filmResults = this.state.filmResults;
-    console.log('render results running', filmResults)
-    //console.log('filmResults', filmResults.length);
 
     return (
       <>
@@ -542,7 +480,7 @@ class App extends Component {
       inputVal: this.state.inputVal,
       queryName: this.state.queryName,
       names: this.state.names,
-      apiNames: this.state.filmData.apiNames,
+      Names: this.state.filmData.Names,
       popSuggestions: this.state.popSuggestions,
       onChangeSuggest: this.onChangeSuggest,
       filmResults: this.state.filmResults,
@@ -550,11 +488,9 @@ class App extends Component {
       getIds: this.getIds,
       updateActors: this.updateActors,
       getCredits: this.getCredits,
-      updateCreditState: this.updateCreditState,
-      updateMovieIdState: this.updateMovieIdState,
       renderPopNames: this.renderPopNames,
       displayProp: this.state.displayProp,
-      renderApiNames: this.renderApiNames,
+      renderNames: this.renderNames,
       spanDisplay: this.state.spanDisplay,
       modalDisplayVal: this.state.modalDisplayVal,
       handleClose: this.handleClose,
@@ -571,7 +507,7 @@ class App extends Component {
           </div>
           <SearchBar/>
           {this.state.queryName !== null && this.state.queryName.length > 2
-            ? this.state.popSuggestions.length > 0 ? <Suggestions className='overflow-scrolling'>{this.renderPopNames()}</Suggestions> : <Suggestions className='overflow-scrolling'>{this.renderApiNames()}</Suggestions>
+            ? this.state.popSuggestions.length > 0 ? <Suggestions className='overflow-scrolling'>{this.renderPopNames()}</Suggestions> : <Suggestions className='overflow-scrolling'>{this.renderNames()}</Suggestions>
             : null
           }
           <span className='titleDisplay' style={{display: this.state.headerDisplay}}>Films with: {this.state.filmsWithActors}</span>
