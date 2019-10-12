@@ -1,24 +1,22 @@
 import React, { Component } from 'react';
 import './SearchBar.css';
 import LethologicaContext from '../LethologicaContext';
-import ReactDOM from 'react-dom';
-
 
 export default class SearchBar extends Component{
   constructor(props){
     super(props)
     this.searchInput = React.createRef();
     this.list = React.createRef();
-
   }
+
   componentDidUpdate(){
     this.searchInput.current.focus()
   }
+
   render() {
     return (
       <LethologicaContext.Consumer>
       {(context) => (
-
         <>
           <span id="searchInstructions">Search two actors/directors/producers</span>
           <div className="input-container">

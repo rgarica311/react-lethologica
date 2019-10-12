@@ -6,7 +6,7 @@ import Suggestions from './Suggestions/Suggestions';
 import './App.css';
 import axios from 'axios';
 import NoResults from './NoResults/NoResults';
-import config from './config';
+import config from './config'
 
 class App extends Component {
   constructor(props) {
@@ -14,11 +14,12 @@ class App extends Component {
     this.getCredits = this.getCredits.bind(this);
     this.onChangeSuggest = this.onChangeSuggest.bind(this);
     this.renderPopNames = this.renderPopNames.bind(this);
-    this.renderNames = this.renderNames.bind(this);
+    this.renderApiNames = this.renderApiNames.bind(this);
     this.getIds = this.getIds.bind(this);
   }
 
   state = {
+    resultsDisplay: 'none',
     headerDisplay: 'none',
     actors: undefined,
     specialCharCheck: null,
@@ -31,25 +32,25 @@ class App extends Component {
     unique0: null,
     unique1: null,
     names: null,
-    Names: null,
+    apiNames: null,
     popNames: null,
-    Data: [],
+    apiData: [],
     popData: [],
     popSuggestions: [],
     filmData: {
-      Data: {
-        Names: [],
-        KnownFor: [],
-        ProfilePath: [],
+      apiData: {
+        apiNames: [],
+        apiKnownFor: [],
+        apiProfilePath: [],
       },
       titleIds: [],
       popNames: [],
-      Names: [],
-      NameIds: [],
+      apiNames: [],
+      apiNameIds: [],
       popNameIds: [],
-      ProfilePath: [],
+      apiProfilePath: [],
       popProfilePath: [],
-      KnownFor: [],
+      apiKnownFor: [],
       popKnownFor: [],
       sharedCreditsIds: [],
     },
@@ -69,63 +70,73 @@ class App extends Component {
 
     this.setState({
       actors: actors,
+
       specialCharCheck: regex.test(actors)
     });
 
   };
 
   async getIds() {
-    this.setState({
-      displayProp: 'none',
-      show: !this.state.show,
-      filmResults: null,
-      filmsWithActors: this.state.actors
-    })
-    if(this.state.name === null){
-      this.setState({
-        headerDisplay: 'none'
-      })
-    }
-    if(this.state.specialCharCheck === true){
-      this.setState({
-        headerDisplay: 'none'
-      })
-    }
-    let regex = /[~\`!"#$%\^&*+=\-\[\]\\;/{}|\:<>\?]/g;
 
-    if(this.state.inputVal !== null){
-      if(regex.test(this.state.inputVal) === false){
-        this.setState({
-          inputVal: ""
-        })
-      }
-    }
-
-    if(this.state.actors !== undefined){
-      if(this.state.actors !== ""){
-        if(this.state.specialCharCheck === false){
-          let actors = this.state.actors.split(',')
-          const responses = [];
-          for (let i = 0; i < actors.length; i++) {
-            let response = await axios.get(`https://.themoviedb.org/3/search/person?api_key=${config.API_KEY}&language=en-US&page=1&include_adult=false&query=${actors[i]}`);
-            if(response.data.results[0] !== undefined) {
-              responses.push(response.data.results[0].id);
-            }
-
-          };
-          this.getCredits(responses);
-        } else {
-          this.setState({
-            show: true
-          })
-        }
-
-      }
-
-    } else {
+    console.log('this.state.actors.includes(',')', this.state.actors.includes(','))
+    if(this.state.actors.includes(',') === false){
       this.setState({
         show: true
       })
+    } else {
+      this.setState({
+        displayProp: 'none',
+        show: !this.state.show,
+        //filmResults: null,
+        filmsWithActors: this.state.actors,
+        resultsDisplay: 'flex'
+      })
+      if(this.state.name === null){
+        this.setState({
+          headerDisplay: 'none'
+        })
+      }
+      if(this.state.specialCharCheck === true){
+        this.setState({
+          headerDisplay: 'none'
+        })
+      }
+      let regex = /[~\`!"#$%\^&*+=\-\[\]\\;/{}|\:<>\?]/g;
+
+      if(this.state.inputVal !== null){
+        if(regex.test(this.state.inputVal) === false){
+          this.setState({
+            inputVal: ""
+          })
+        }
+      }
+
+      if(this.state.actors !== undefined){
+        if(this.state.actors !== ""){
+          if(this.state.specialCharCheck === false){
+            let actors = this.state.actors.split(',')
+            const responses = [];
+            for (let i = 0; i < actors.length; i++) {
+              let response = await axios.get(`https://api.themoviedb.org/3/search/person?api_key=${config.API_KEY}&language=en-US&page=1&include_adult=false&query=${actors[i]}`);
+              if(response.data.results[0] !== undefined) {
+                responses.push(response.data.results[0].id);
+              }
+
+            };
+            this.getCredits(responses);
+          } else {
+            this.setState({
+              show: true
+            })
+          }
+
+        }
+
+      } else {
+        this.setState({
+          show: true
+        })
+      }
     }
 
   }
@@ -139,7 +150,7 @@ class App extends Component {
     let baseUrl = 'http://image.tmdb.org/t/p/w185/';
     let popData = {...this.state.popData}
     for(let i = 1; i<50; i++) {
-        let response = await axios.get(`https://.themoviedb.org/3/person/popular?api_key=${config.API_KEY}&language=en-US&page=${i}`)
+        let response = await axios.get(`https://api.themoviedb.org/3/person/popular?api_key=${config.API_KEY}&language=en-US&page=${i}`)
         for(let j = 0; j<response.data.results.length; j++){
           let object = 'object' + i;
           popData[object] = {
@@ -160,25 +171,26 @@ class App extends Component {
   };
 
 
-  renderNames(){
+  renderApiNames(){
+
       return (
 
         <>
             { this.state.renderRan > 1
               ? null
-              : this.state.Data.length !== 0
+              : this.state.apiData.length !== 0
                 ? <ul className='suggestion_list' style={{display: this.state.displayProp}}>
-                    {this.state.Data.map(object =>
+                    {this.state.apiData.map(object =>
                     <li onClick={() => {
                         this.state.inputVal === this.state.queryName
                           ? this.setState({
-                              inputVal: object.Name + ', ',
-                              firstName: object.Name + ', ',
+                              inputVal: object.apiName + ', ',
+                              firstName: object.apiName + ', ',
                               displayProp: 'none',
                               spanDisplay: 'block',
                             })
                           : this.setState({
-                              inputVal: this.state.firstName +  object.Name,
+                              inputVal: this.state.firstName +  object.apiName,
                               displayProp: 'none',
                               spanDisplay: 'none',
                           }, () => {
@@ -188,14 +200,14 @@ class App extends Component {
                             })
                           })
 
-                      }} className='suggestion_element' key={object.ID}>
-                      {!object.ProfilePath.includes(null)
-                        ? <img className='suggestion_image' alt='profile' src={object.ProfilePath}></img>
+                      }} className='suggestion_element' key={object.apiID}>
+                      {!object.apiProfilePath.includes(null)
+                        ? <img className='suggestion_image' alt='profile' src={object.apiProfilePath}></img>
                         : <img className='suggestion_image' alt='profile' src={require('./Images/profile.svg')}></img>}
                       <div className='text_info'>
-                        <span className='suggest_text'>{object.Name}</span>
-                        {object.KnownFor !== undefined
-                          ? <span className='suggest_text'>Known for: {object.KnownFor.title}</span>
+                        <span className='suggest_text'>{object.apiName}</span>
+                        {object.apiKnownFor.title !== undefined
+                          ? <span className='suggest_text'>Known for: {object.apiKnownFor.title}</span>
                           : null
                         }
                       </div>
@@ -218,6 +230,7 @@ class App extends Component {
             ? <ul className='suggestion_list' style={{display: this.state.displayProp}}>
               {this.state.popSuggestions.map(object =>
               <li onClick={() => {
+
                   this.state.inputVal === this.state.queryName
                     ? this.setState({
                         inputVal: object.popName + ', ',
@@ -262,15 +275,17 @@ class App extends Component {
 
   }
 
-  ctalizeName(str) {
+  capitalizeName(str) {
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()})
   }
 
   async onChangeSuggest(query) {
     let regex = /[~\`!"#$%\^&*+=\-\[\]\\;/{}|\:<>\?]/g;
     this.setState({
-      inputVal: this.ctalizeName(query),
-      spanDisplay: 'none'
+      inputVal: this.capitalizeName(query),
+      spanDisplay: 'none',
+      headerDisplay: 'none',
+      resultsDisplay: 'none',
     })
     if(regex.test(this.state.inputVal) === false){
       const suggestedNames = [];
@@ -289,13 +304,14 @@ class App extends Component {
         const nameIds = [];
         const profilePath = [];
         const knownFor = [];
-        const DataObjects = [];
+        const apiDataObjects = [];
         const popResults = [];
-        let Data = {...this.state.Data};
+        let apiData = {...this.state.apiData};
         let baseUrl = 'http://image.tmdb.org/t/p/w185/';
         for(let i=0; i<this.state.popData.length; i++) {
           for(let key in this.state.popData[i]) {
             if(key !== 'popKnownFor' && key !== 'popProfilePath' && key !== 'popID') {
+
               if(this.state.popData[i][key].indexOf(name) !== -1) {
                 popResults.push(this.state.popData[i]);
               }
@@ -312,34 +328,32 @@ class App extends Component {
           popSuggestions: popResults
         })
 
-        if(suggestedNames.length >= 1){
-          let response = await axios.get(`https://.themoviedb.org/3/search/person?api_key=${config.API_KEY}&language=en-US&page=1&include_adult=false&query=${name}`);
+        if(suggestedNames.length <= 0){
+          let response = await axios.get(`https://api.themoviedb.org/3/search/person?api_key=${config.API_KEY}&language=en-US&page=1&include_adult=false&query=${name}`);
           for (let i = 0; i<response.data.results.length; i++) {
             let object = 'object' + i
 
-            Data[object] = {
-              Name: response.data.results[i].name,
-              ProfilePath: baseUrl + response.data.results[i].profile_path,
-              KnownFor: response.data.results[i].known_for[0],
-              ID: response.data.results[i].id
+            apiData[object] = {apiName: response.data.results[i].name,
+              apiProfilePath: baseUrl + response.data.results[i].profile_path,
+              apiKnownFor: response.data.results[i].known_for[0],
+              apiID: response.data.results[i].id
              }
-            DataObjects.push(Data[object])
+            apiDataObjects.push(apiData[object])
             responses.push(response.data.results[i].name)
             nameIds.push(response.data.results[i].id)
           }
 
           let filmData = {...this.state.filmData};
-          filmData.Data.Names = responses;
-          filmData.NameIds = nameIds;
-          filmData.Data.ProfilePath = profilePath
-          filmData.Data.KnownFor = knownFor
+
+          filmData.apiData.apiNames = responses;
+          filmData.apiNameIds = nameIds;
+          filmData.apiData.apiProfilePath = profilePath
+          filmData.apiData.apiKnownFor = knownFor
           this.setState({
-            Data: DataObjects,
-            Names: responses,
+            apiData: apiDataObjects,
+            apiNames: responses,
             filmData,
           })
-
-        } else {
 
         }
 
@@ -353,7 +367,7 @@ class App extends Component {
   }
 
   async getCredits (ids)  {
-    const url = 'https://.themoviedb.org/3/person/';
+    const url = 'https://api.themoviedb.org/3/person/';
 
     try {
       for (let i = 0; i < ids.length; i++) {
@@ -419,8 +433,40 @@ class App extends Component {
 
   }
 
+
+
+  updateCreditState (credit, titles) {
+
+    this.setState(prevState => ({
+      filmData: {
+        ...prevState.filmData,
+        [credit]: titles,
+      },
+    }));
+
+  };
+
+  updateMovieIdState (movieid, titleIds) {
+    this.setState(prevState => ({
+      filmData: {
+        ...prevState.filmData,
+        [movieid]: titleIds,
+      },
+
+    }));
+  };
+
+  /*updateSharedCreditsIds(ids) {
+    this.setState(prevState => ({
+      filmData: {
+        ...prevState.filmData,
+        sharedCreditsIds: ids,
+      },
+    }));
+  };*/
+
   async getFilmInfo(ids) {
-    const url = 'https://.themoviedb.org/3/movie/';
+    const url = 'https://api.themoviedb.org/3/movie/';
     let responses = [];
     try {
       for (let i = 0; i < ids.length; i++) {
@@ -443,7 +489,6 @@ class App extends Component {
           show: true
         })
       }
-
 
     } catch (error) {
       console.error(error);
@@ -480,7 +525,7 @@ class App extends Component {
       inputVal: this.state.inputVal,
       queryName: this.state.queryName,
       names: this.state.names,
-      Names: this.state.filmData.Names,
+      apiNames: this.state.filmData.apiNames,
       popSuggestions: this.state.popSuggestions,
       onChangeSuggest: this.onChangeSuggest,
       filmResults: this.state.filmResults,
@@ -488,9 +533,11 @@ class App extends Component {
       getIds: this.getIds,
       updateActors: this.updateActors,
       getCredits: this.getCredits,
+      updateCreditState: this.updateCreditState,
+      updateMovieIdState: this.updateMovieIdState,
       renderPopNames: this.renderPopNames,
       displayProp: this.state.displayProp,
-      renderNames: this.renderNames,
+      renderApiNames: this.renderApiNames,
       spanDisplay: this.state.spanDisplay,
       modalDisplayVal: this.state.modalDisplayVal,
       handleClose: this.handleClose,
@@ -507,11 +554,11 @@ class App extends Component {
           </div>
           <SearchBar/>
           {this.state.queryName !== null && this.state.queryName.length > 2
-            ? this.state.popSuggestions.length > 0 ? <Suggestions className='overflow-scrolling'>{this.renderPopNames()}</Suggestions> : <Suggestions className='overflow-scrolling'>{this.renderNames()}</Suggestions>
+            ? this.state.popSuggestions.length > 0 ? <Suggestions className='overflow-scrolling'>{this.renderPopNames()}</Suggestions> : <Suggestions className='overflow-scrolling'>{this.renderApiNames()}</Suggestions>
             : null
           }
           <span className='titleDisplay' style={{display: this.state.headerDisplay}}>Films with: {this.state.filmsWithActors}</span>
-          <div className='flex_results'>
+          <div style={{display: this.state.resultsDisplay}} className='flex_results'>
             {this.renderResults()}
           </div>
         </main>

@@ -4,9 +4,8 @@ import LethologicaContext from '../LethologicaContext';
 
 export default class NoResults extends Component {
 
-
   onClose = e => {
-    this.props.onClose && this.props.onClose(e);
+    this.props.onClose && this.props.onClose( e );
   };
 
   render() {
@@ -14,42 +13,47 @@ export default class NoResults extends Component {
     return (
       <LethologicaContext.Consumer>
       {
-        (context) => (
+        ( context ) => (
 
-        context.show === true && context.actors === undefined
-          ?<div className='no-results-modal'>
+        context.show === true && context.actors === undefined ? <div className='no-results-modal'>
             <span>Sorry, it looks like the search field may have been empty.</span>
             <span>Try a different search!</span>
             <button onClick={e => {
-              this.onClose(e);
+              this.onClose( e );
             }}>Close</button>
           </div>
-          : context.show === true && context.specialCharCheck === true
-              ?<div className='no-results-modal'>
+          : context.show === true && context.specialCharCheck === true ? <div className='no-results-modal'>
                 <span>Sorry, no special characters allowed.</span>
                 <span>Try a different search!</span>
                 <button onClick={e => {
-                  this.onClose(e);
+                  this.onClose( e );
                 }}>Close</button>
               </div>
-              : context.show === true && context.actors === ""
-                  ? <div className='no-results-modal'>
+              : context.show === true && context.actors === '' ?
+                  <div className='no-results-modal'>
                     <span>Search field is empty.</span>
                     <span>Try a different search!</span>
                     <button onClick={e => {
-                      this.onClose(e);
+                      this.onClose( e );
                     }}>Close</button>
                   </div>
-                  : context.show === true && context.filmResults === null
+                  : context.show === true && context.filmResults === null && context.actors.includes(',') === true
                       ? <div className='no-results-modal'>
                         <span>Sorry, no shared credits found.</span>
                         <span>Try a different search!</span>
                         <button onClick={e => {
-                          this.onClose(e);
+                          this.onClose( e );
                         }}>Close</button>
                       </div>
-                      : null
-
+                      : context.show === true && !context.actors.includes(',')
+                        ? <div className='no-results-modal'>
+                          <span>Names must be separated by a comma.</span>
+                          <span>Try a different search!</span>
+                          <button onClick={e => {
+                            this.onClose( e );
+                          }}>Close</button>
+                        </div>
+                        :null
 
       )}
       </LethologicaContext.Consumer>
