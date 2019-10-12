@@ -1,11 +1,8 @@
-import React, { Component } from 'react';
-import LethologicaContext from '../LethologicaContext';
+import React from 'react';
 
 import './Suggestions.css';
 
-export default class Suggestions extends Component {
-
-  render() {
+function Suggestions( props ) {
     return (
       <LethologicaContext.Consumer>
       {(context) => (
@@ -16,5 +13,6 @@ export default class Suggestions extends Component {
       )}
     </LethologicaContext.Consumer>
     );
-  }
 }
+
+export default Suggestions;
