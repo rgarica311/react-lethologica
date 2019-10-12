@@ -4,15 +4,11 @@ import './Suggestions.css';
 
 function Suggestions( props ) {
     return (
-      <LethologicaContext.Consumer>
-      {(context) => (
-            <div className='suggestions' >
-              {this.props.children}
-                <div className='empty'></div>
-            </div>
-      )}
-    </LethologicaContext.Consumer>
+      <div className='suggestions' >
+          {props.children}
+          <div className='empty'></div>
+     </div>
     );
-}
+  }
 
 export default Suggestions;

@@ -23,7 +23,7 @@ class App extends Component {
     headerDisplay: 'none',
     actors: undefined,
     specialCharCheck: null,
-    show: 'true',
+    show: 'false',
     searchInput: 'searchInput',
     inputVal: '',
     firstName: '',
@@ -78,64 +78,77 @@ class App extends Component {
 
   async getIds() {
 
-    console.log('this.state.actors.includes(',')', this.state.actors.includes(','))
-    if(this.state.actors.includes(',') === false){
+    if(this.state.actors === undefined){
       this.setState({
-        show: true
-      })
-    } else {
-      this.setState({
-        displayProp: 'none',
-        show: !this.state.show,
-        //filmResults: null,
-        filmsWithActors: this.state.actors,
+        show: true,
         resultsDisplay: 'flex'
       })
-      if(this.state.name === null){
-        this.setState({
-          headerDisplay: 'none'
-        })
-      }
+    } else {
       if(this.state.specialCharCheck === true){
         this.setState({
-          headerDisplay: 'none'
+          filmResults: null
         })
       }
-      let regex = /[~\`!"#$%\^&*+=\-\[\]\\;/{}|\:<>\?]/g;
 
-      if(this.state.inputVal !== null){
-        if(regex.test(this.state.inputVal) === false){
-          this.setState({
-            inputVal: ""
-          })
-        }
-      }
-
-      if(this.state.actors !== undefined){
-        if(this.state.actors !== ""){
-          if(this.state.specialCharCheck === false){
-            let actors = this.state.actors.split(',')
-            const responses = [];
-            for (let i = 0; i < actors.length; i++) {
-              let response = await axios.get(`https://api.themoviedb.org/3/search/person?api_key=${config.API_KEY}&language=en-US&page=1&include_adult=false&query=${actors[i]}`);
-              if(response.data.results[0] !== undefined) {
-                responses.push(response.data.results[0].id);
-              }
-
-            };
-            this.getCredits(responses);
-          } else {
-            this.setState({
-              show: true
-            })
-          }
-
-        }
-
+      if(this.state.actors.includes(',') === false){
+        this.setState({
+          show: true,
+          resultsDisplay: 'flex'
+        })
       } else {
         this.setState({
-          show: true
+          displayProp: 'none',
+          //show: !this.state.show,
+          filmResults: null,
+          filmsWithActors: this.state.actors,
+          resultsDisplay: 'flex'
         })
+        if(this.state.name === null){
+          this.setState({
+            headerDisplay: 'none'
+          })
+        }
+        if(this.state.specialCharCheck === true){
+          this.setState({
+            headerDisplay: 'none'
+          })
+        }
+        let regex = /[~\`!"#$%\^&*+=\-\[\]\\;/{}|\:<>\?]/g;
+
+        if(this.state.inputVal !== null){
+          if(regex.test(this.state.inputVal) === false){
+            this.setState({
+              inputVal: ""
+            })
+          }
+        }
+
+        if(this.state.actors !== undefined){
+          if(this.state.actors !== ""){
+            if(this.state.specialCharCheck === false){
+              let actors = this.state.actors.split(',')
+              const responses = [];
+              for (let i = 0; i < actors.length; i++) {
+                let response = await axios.get(`https://api.themoviedb.org/3/search/person?api_key=${config.API_KEY}&language=en-US&page=1&include_adult=false&query=${actors[i]}`);
+                if(response.data.results[0] !== undefined) {
+                  responses.push(response.data.results[0].id);
+                }
+
+              };
+              this.getCredits(responses);
+            } else {
+              this.setState({
+                show: true
+              })
+            }
+
+          }
+
+        } else {
+          this.setState({
+            show: true
+          })
+        }
       }
     }
 
@@ -206,8 +219,8 @@ class App extends Component {
                         : <img className='suggestion_image' alt='profile' src={require('./Images/profile.svg')}></img>}
                       <div className='text_info'>
                         <span className='suggest_text'>{object.apiName}</span>
-                        {object.apiKnownFor.title !== undefined
-                          ? <span className='suggest_text'>Known for: {object.apiKnownFor.title}</span>
+                        {object.apiKnownFor !== undefined
+                          ? object.apiKnownFor.title !== undefined ? <span className='suggest_text'>Known for: {object.apiKnownFor.title}</span> : null
                           : null
                         }
                       </div>
@@ -260,8 +273,8 @@ class App extends Component {
                   <span className='suggest_text'>{object.popName}</span>
                   {
                     object.popKnownFor !== undefined
-                    ? <span className='suggest_text'>Known for: {object.popKnownFor.title}</span>
-                    : null
+                      ? object.popKnowFor.title !== undefined ? <span className='suggest_text'>Known for: {object.popKnownFor.title}</span> : null
+                      : null
                   }
 
                 </div>
@@ -286,7 +299,18 @@ class App extends Component {
       spanDisplay: 'none',
       headerDisplay: 'none',
       resultsDisplay: 'none',
+      show: false,
+    }, () => {
+      if(this.state.inputVal.includes(', ')){
+        if(this.state.inputVal.indexOf(',') === this.state.inputVal.length - 2){
+          this.setState({
+            firstName: this.state.inputVal
+          })
+        }
+      }
     })
+
+
     if(regex.test(this.state.inputVal) === false){
       const suggestedNames = [];
       let name = query.charAt(0).toUpperCase() + query.slice(1);

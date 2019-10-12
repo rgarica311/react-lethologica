@@ -22,7 +22,8 @@ export default class NoResults extends Component {
               this.onClose( e );
             }}>Close</button>
           </div>
-          : context.show === true && context.specialCharCheck === true ? <div className='no-results-modal'>
+          : context.show === true && context.specialCharCheck === true ?
+              <div className='no-results-modal'>
                 <span>Sorry, no special characters allowed.</span>
                 <span>Try a different search!</span>
                 <button onClick={e => {

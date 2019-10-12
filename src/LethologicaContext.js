@@ -12,8 +12,6 @@ const LethologicaContext = React.createContext({
   updateCreditState: () => {},
   updateMovieIdState: () => {},
   onChangeSuggest: () => {},
-  updateActors: () => {},
-  getIds: () => {},
   spanDisplay: null,
   inputVal: '',
   searchInput: 'searchInput',
